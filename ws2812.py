@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Source: https://github.com/JanBednarik/micropython-ws2812/blob/master/ws2812.py
 
 import gc
