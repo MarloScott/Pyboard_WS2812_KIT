@@ -17,6 +17,7 @@ class LedStrip:
         led_pos:        Used for tracking a single LED position
         led_driver:     Instance of the ws2812 Driver
         led_intensity:  Sets main LEDs intensity (value between 0-1)
+        led_direction:  Direction of movement. 1 for right, -1 for left and 0 for not moving
     """
 
     def __init__(self, led_number=1, init_color=(0xff,0xff,0xff), spi_bus=1, intensity=1):
@@ -45,7 +46,7 @@ class LedStrip:
 
     def init_single_led(self):
         self.led_list = [((0,0,0),0) for i in range(self.led_number)]
-        self.led_list[0] = (self.led_color,self.led_intensity)
+        self.set_led_intensity(0, self.led_color, self.led_intensity)
         self.led_pos = 0
         self.update()
 
@@ -64,7 +65,7 @@ class LedStrip:
                            for i in range(self.led_number)]
             self.led_pos -= 1
             self.update()
-        else:
+
 
 
 
@@ -94,13 +95,29 @@ class LedStrip:
 
     def scroll_right(self, delay):
         for x in range(self.led_number-1):
-             self.shift_right_swap()
+             #self.shift_right_swap()
+             self.move_right()
              pyb.delay(delay)
 
     def scroll_left(self, delay):
         for x in range(self.led_number-1):
-             self.shift_left_swap()
+             #self.shift_left_swap()
+             self.move_left()
              pyb.delay(delay)
+
+    def move_left(self):
+        if(self.led_pos>0):
+            self.fade_all_led()
+            self.led_pos -= 1
+            self.set_led_intensity(self.led_pos, self.led_color, self.led_intensity)
+            self.update()
+
+    def move_right(self):
+        if(self.led_pos<self.led_number-1):
+            self.fade_all_led()
+            self.led_pos += 1
+            self.set_led_intensity(self.led_pos, self.led_color, self.led_intensity)
+            self.update()
 
     def set_led_intensity(self, led, color, intensity):
         if(intensity < 0 or intensity > 1):
@@ -111,6 +128,12 @@ class LedStrip:
             b = (int)(color[2]*intensity)
             self.led_list[led] = ((r,g,b),intensity)
         self.update()
+
+    def fade_all_led(self):
+        fade_amount = 0.7
+        for x in range(self.led_number):
+            self.set_led_intensity(x, self.led_color, self.led_list[x][1]*fade_amount)
+
 
     def change_color(self):
         r = int((1 + math.sin(self.led_n_color * 0.1324)) * 127)

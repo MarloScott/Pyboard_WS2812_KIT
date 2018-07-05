@@ -3,19 +3,19 @@
 # Compatible with Pyboard and WS2812 RGB LED
 # WS2812 Datasheet: https://cdn-shop.adafruit.com/datasheets/WS2812.pdf
 
-from pyb import SPI
+from pyb import SPI, Timer
 import ledstrip
 
-led_strip = ledstrip.LedStrip(led_number=8, init_color=(0xff,0,0), spi_bus=1, intensity=0.1)
+led_strip = ledstrip.LedStrip(led_number=8, init_color=(0xff,0,0), spi_bus=1, intensity=0.3)
 
-led_strip.init_kit_scroll()
+#led_strip.init_kit_scroll()
+led_strip.init_single_led()
 
-delay = 100
+delay = 60
 accel = pyb.Accel()
 movement_threshold = 5
 
 def test():
-    led_strip.init_kit_scroll()
     count = 0
 
     while True:
@@ -52,7 +52,8 @@ def test():
                 count = 0
                 led_strip.init_kit_scroll()
                 while (abs(x) > movement_threshold):
-                    led_strip.scroll_right(40)
-                    led_strip.scroll_left(40)
+                    led_strip.scroll_right(delay)
+                    #led_strip.change_color()
+                    led_strip.scroll_left(delay)
                     x = accel.x()
             pyb.delay(100)
