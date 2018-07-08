@@ -7,30 +7,29 @@ import math
 class LedStrip:
 
     """
-    Class to represent a strip of LEDs and provide basic manipulation methods.
+    Class to represent a strip of LEDs. Provids basic manipulation methods.
 
     Attributes:
-        led_number:     Number of total LEDs
-        led_list:       list of each LEDs color value
-        led_n_color:    Used for calculating new color values
-        led_color:      Stores current color value for all LEDs
-        led_pos:        Used for tracking a single LED position
-        led_driver:     Instance of the ws2812 Driver
-        led_intensity:  Sets main LEDs intensity (value between 0-1)
+        led_number: Number of total LEDs
+        led_list: list of each LEDs color value and intensity
+        led_n_color: Used for calculating new color values
+        led_color: Stores current color value for all LEDs
+        led_pos: Used for tracking a single LED position
+        led_driver: Instance of the ws2812 Driver
+        led_intensity: Sets main LEDs intensity (value between 0-1)
         led_color_change_enable: Enables color cycling
     """
 
     def __init__(self, led_number=1, init_color=(0xff,0xff,0xff), spi_bus=1, intensity=1):
         self.led_number = led_number
-        self.led_color  = init_color
-        self.led_list   = [(self.led_color, intensity) for i in range(led_number)]
+        self.led_color = init_color
+        self.led_list = [(self.led_color, intensity) for i in range(led_number)]
         self.led_driver = ws2812.ws2812(spi_bus=spi_bus, led_count=led_number, intensity=1)
-        self.led_pos    = 0
+        self.led_pos = 0
         self.led_intensity = intensity
-        self.led_n_color    = 107
+        self.led_n_color = 107
         self.led_color_change_enable = 0
         self.update()
-
 
     def update(self):
         stripped_led_list = [self.led_list[x][0] for x in range(self.led_number)]
@@ -46,7 +45,6 @@ class LedStrip:
         if(self.led_color_change_enable == 1):
             self.change_color()
         for x in range(self.led_number-1):
-             #self.shift_right_swap()
              self.shift_right()
              pyb.delay(delay)
 
@@ -54,9 +52,14 @@ class LedStrip:
         if(self.led_color_change_enable == 1):
             self.change_color()
         for x in range(self.led_number-1):
-             #self.shift_left_swap()
              self.shift_left()
              pyb.delay(delay)
+
+    def auto_scroll(self,delay):
+        if(self.led_pos == 0):
+            self.scroll_right(delay)
+        else:
+            self.scroll_left(delay)
 
     def shift_left(self):
         self.fade_all_led()
@@ -83,7 +86,7 @@ class LedStrip:
         self.update()
 
     def fade_all_led(self):
-        fade_amount = 0.9
+        fade_amount = 0.9 # Decrease all LEDs by ((1-fade_amount)*100)%
         for x in range(self.led_number):
             self.set_led_intensity(x, self.led_list[x][0], self.led_list[x][1]*fade_amount)
 
